@@ -19,6 +19,7 @@ class MqttClient:
             #Increver-se nos tópicos desejados
             client.subscribe("monitoramento/temperatura")
             client.subscribe("monitoramento/umidade")
+            client.subscribe("monitoramento/heartbeat")
         else:
             print(f"Falha ao conectar ao broker mqtt, código de retorno: {rc}")
 

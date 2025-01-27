@@ -25,5 +25,6 @@ class DataProcessor:
             self.previous_values["temperatura"] = temperatura
             self.previous_values["umidade"] = umidade
 
-    
+        if topic == "monitoramento/heartbeat":
+            print(payload)
     

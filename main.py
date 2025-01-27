@@ -1,9 +1,12 @@
+import time
+time.sleep(10) 
 from databases import Database
 from mqttClient import MqttClient
 from dataProcessor import DataProcessor
 from graphGenerator import GraphGenerator
 import threading
-import time
+
+
 
 # Loop para o gráfico ser sempre atualizado
 def update_graph_periodically():
@@ -30,16 +33,5 @@ mqtt_client.start()
 
 
 
-def uso_database():
-    # Obter um cursor
-    cursor = db.get_cursor()
-
-    # Executa uma consulta
-    cursor.execute("SELECT * FROM valores;")
-
-    # Extrair todos os registros retornados de uma consulta SQL e armazena na variável valores
-    valores = cursor.fetchall()
-
-    print(valores)
 
 
