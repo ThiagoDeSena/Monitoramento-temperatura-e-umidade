@@ -13,8 +13,9 @@ class DataProcessor:
 
     # Verifica o tópico e insere o valor no banco de dados
     def process_data(self,topic,payload):
+    
         self.data_to_insert[topic]=payload  # Atribui o dicionário daquele tópico a sua mensagem
-
+    
         if self.data_to_insert["monitoramento/temperatura"] is not None and \
            self.data_to_insert["monitoramento/umidade"] is not None:
             temperatura = self.data_to_insert["monitoramento/temperatura"]

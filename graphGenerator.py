@@ -36,7 +36,6 @@ class GraphGenerator:
     def fetch_data_start_and_end(_self,start_date,end_date):
         cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
         query = f"SELECT temperatura, umidade, data FROM valores WHERE data BETWEEN '{start_date}' AND '{end_date}' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
-        print(query)
         cursor.execute(query) # seleciona o 100 últimos valores de temperatura e data
         data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
         #Cria um DataFrame a partir dos resultados da consulta
@@ -44,9 +43,10 @@ class GraphGenerator:
         return df
 
     # Cria o gráfico
-    def create_graph(self,data):
+    def create_graph(self,data,variavel):
 
-        fig = px.line(data,x='data',y=['temperatura','umidade'],title='Evolução da temperatura e Umidade')
+        #fig = px.line(data,x='data',y=['temperatura','umidade'],title='Evolução da temperatura e Umidade')
+        fig = px.line(data,x='data',y=variavel)
         fig.update_traces(mode="markers+lines",hovertemplate=None) # Altera a visualização das informações no texto do mouser hover do gráfico
         fig.update_layout(
             hovermode="x unified",
@@ -63,54 +63,52 @@ class GraphGenerator:
     
     # Atualiza o gráfico com os valores novos
     def update_graph(self):
+        
+        print('Passou pelo update_graph')
         st.title("Gráfico de Monitoramento")
-
-        col1,col2,col3,col4,col5= st.columns(5,gap="small",vertical_alignment="center")
-        df = self.fetch_all_data() #Por padrão já mostra todos os dados
+        df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
         #Botões para a seleção do intevalo
-        with col1:
-            if st.button('Todos os dados'):
-                df = self.fetch_all_data()  #Pega os valores do dataframe criado na consulta do banco
-                
-        with col2:
-            if st.button('1 Dia'):
-                df = self.fetch_data_for_last_n_days(1)
+        with st.sidebar:
+            st.header("Selecionar Período")
+            col1,col2,col3 = st.columns(3)
 
-        with col3:
-            if st.button('7 Dias'):
-                df = self.fetch_data_for_last_n_days(7)
+            with col1:
+                if st.button('1 Dia'):
+                    df = self.fetch_data_for_last_n_days(1)
 
-        with col4:
-            if st.button('30 Dias'):
-                df = self.fetch_data_for_last_n_days(30)
+            with col2:
+                if st.button('7 Dias'):
+                    df = self.fetch_data_for_last_n_days(7)
 
-        with st.expander('Selecionar Intervalo de Datas',icon=":material/search:"):
+            with col3:
+                if st.button('30 Dias'):
+                    df = self.fetch_data_for_last_n_days(30)
+
+            if st.button('Tudo',use_container_width=True):
+                    df = self.fetch_all_data()  #Pega os valores do dataframe criado na consulta do banco
+
+            st.sidebar.expander('Selecionar Intervalo de Datas',icon=":material/search:")
             col1,col2 = st.columns(2)
             with col1:
                 start_date = st.date_input("Data Inicial",datetime.today(),key="start")
             with col2:
                 end_date = st.date_input("Data Final",datetime.today(),key="end")
-            if st.button('Buscar'):
+            if st.button('Buscar',use_container_width=True):
                 if start_date and end_date:
                     df = self.fetch_data_start_and_end(start_date,end_date)
                 else:
                     st.warning('Selecione a data de inicil e fim da busca!',icon=":material/warning:")
         
-        
-        if df is not None:
-            self.create_graph(df)  
+            if df is not None:
+                mask = df.columns != 'data' #Cria uma máscara com True para as colunas diferentes de data
+                variavel = st.multiselect("Escolher variável",df.columns[mask],placeholder="Escolha uma opção")
+                if not variavel:
+                    variavel=['temperatura','umidade'] #Se não for escolhido nenhuma variável no st.multiselect então a minha variavel vai receber os dois valores ['temperatura','umidade']
 
-    '''def create_graph(self,data):
-        if 'fig' not in st.session_state:
-            #Cria o gráfico pela 1° vez
-            fig = px.line(data, x='data',y='temperatura')
-            st.plotly_chart(fig, use_container_width=True)
-            st.session_state.fig = fig
-        else:
-            #Atualiza o gráfico existente
-            fig = st.session_state.fig
-            fig.add_trace(go.Scatter(x=data['data'],y=data['temperatura'],name='Nova LInha'))
-            st.plotly_chart(fig)'''
+        self.create_graph(df,variavel)  
+
+
+
 
     
 
