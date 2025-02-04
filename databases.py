@@ -21,21 +21,18 @@ class Database:
     def close_connection(self):
         self.conecao.close()
 
-    # Inserir temperatura no banco
-    def insert_temperatura(self,temperatura):
-        cursor = self.conecao.cursor()
-        cursor.execute("INSERT INTO valores (temperatura, data) VALUES (%s, NOW())",(temperatura,))
-        self.conecao.commit()   #Salva as alterações no banco
-
-    
-    # Inserir umidade no banco
-    def insert_umidade(self,umidade):
-        cursor = self.conecao.cursor()
-        cursor.execute("INSERT INTO valores (umidade, data) VALUES (%s, NOW())",(umidade,))
-        self.conecao.commit()   #Salva as alterações no banco
 
     # Inserir valores no banco
-    def insert_into_database(self,temperatura,umidade):
+    def insert_into_database(self,temperatura,umidade,timestamp):
         cursor = self.conecao.cursor()
-        cursor.execute("INSERT INTO valores (temperatura,umidade, data) VALUES (%s,%s, NOW())",(temperatura,umidade))
-        self.conecao.commit()   #Salva as alterações no banco
+
+        #Verifica se o dado já existe
+        cursor.execute("SELECT * FROM valores WHERE temperatura=%s AND umidade=%s AND data=%s",(temperatura,umidade,timestamp))
+        resultado = cursor.fetchone()
+
+        if not resultado:
+            #Insere o dado se ele não existe
+            cursor.execute("INSERT INTO valores (temperatura,umidade, data) VALUES (%s,%s,%s)",(temperatura,umidade,timestamp))
+            self.conecao.commit()   #Salva as alterações no banco
+        else:
+            print("Dado já existe no banco de dados!")

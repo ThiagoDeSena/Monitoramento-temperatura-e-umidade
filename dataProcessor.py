@@ -1,3 +1,4 @@
+import datetime
 
 class DataProcessor:
     def __init__(self,database):
@@ -20,7 +21,10 @@ class DataProcessor:
            self.data_to_insert["monitoramento/umidade"] is not None:
             temperatura = self.data_to_insert["monitoramento/temperatura"]
             umidade = self.data_to_insert["monitoramento/umidade"]
-            self.db.insert_into_database(temperatura, umidade)
+            timestamp = datetime.datetime.now()
+            print(f"Formato do timestamp: {timestamp}")
+            timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            self.db.insert_into_database(temperatura, umidade,timestamp_str)
             '''self.previous_values["temperatura"] = temperatura
             self.previous_values["umidade"] = umidade'''
         
