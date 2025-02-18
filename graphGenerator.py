@@ -6,8 +6,9 @@ from datetime import datetime, timedelta
 
 class GraphGenerator:
     
-    def __init__(self,database):
+    def __init__(self,database,mqttClient):
         self.db = database
+        self.mqtt_client = mqttClient
 
     # Consulta o banco de dados para obter todos dados
     @st.cache_data(ttl=30)  # Guarda os dados em um cache e Atualiza o cache a cada 30 segundos
@@ -105,10 +106,43 @@ class GraphGenerator:
                 if not variavel:
                     variavel=['temperatura','umidade'] #Se não for escolhido nenhuma variável no st.multiselect então a minha variavel vai receber os dois valores ['temperatura','umidade']
 
+            self.publish_button()
+
         self.create_graph(df,variavel)  
 
 
+    #Publica uma mensagem para acionar o relé
+    def publish_button(self):
 
+        st.header("Enviar mensagem")
+        col1,col2 = st.columns(2)
+        col11,col22 = st.columns(2)
+
+        with col1:
+            with col11:
+                #Aciona o relé
+                if st.button('Acionar Relé'):
+                    message = "l"
+                    self.mqtt_client.publish_message("monitoramento/publisher",message)
+            
+            with col22:
+                #Aciona o relé
+                if st.button('Desaciona Relé'):
+                    message = "d"
+                    self.mqtt_client.publish_message("monitoramento/publisher",message)
+
+        with col2:
+            with col11:
+                #Aciona o relé
+                if st.button('Acionar Buzzer'):
+                    message = "a"
+                    self.mqtt_client.publish_message("monitoramento/publisher",message)
+            
+            with col22:
+                #Aciona o relé
+                if st.button('Desaciona Buzzer'):
+                    message = "p"
+                    self.mqtt_client.publish_message("monitoramento/publisher",message)
 
     
 

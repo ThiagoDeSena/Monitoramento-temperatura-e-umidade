@@ -37,3 +37,8 @@ class MqttClient:
     #   Inicia o loop do cliente MQTT, aguardando por novas mensagens 
     def start(self):
         self.client.loop_forever()
+
+    #Publica uma messagem no topico passado
+    def publish_message(self,topic,message):
+        self.client.publish(topic,message)
+        print(f"Messagem publicada no tópico {topic}: {message}")
