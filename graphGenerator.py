@@ -35,7 +35,7 @@ class GraphGenerator:
     @st.cache_data(ttl=30) 
     def fetch_data_start_and_end(_self,start_date,end_date):
         cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
-        query = f"SELECT temperatura, umidade, data FROM valores WHERE data BETWEEN '{start_date}' AND '{end_date}' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
+        query = f"SELECT temperatura, umidade, data FROM valores WHERE data >= '{start_date} 00:00:00' AND data <= '{end_date} 23:59:59' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
         cursor.execute(query) # seleciona o 100 últimos valores de temperatura e data
         data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
         #Cria um DataFrame a partir dos resultados da consulta
