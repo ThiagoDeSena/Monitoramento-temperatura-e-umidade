@@ -11,7 +11,7 @@ class GraphGenerator:
         self.mqtt_client = mqttClient
 
     # Consulta o banco de dados para obter todos dados
-    @st.cache_data(ttl=30)  # Guarda os dados em um cache e Atualiza o cache a cada 30 segundos
+    @st.cache_data(ttl=3600)   # Guarda os dados em um cache. Para Atualiza o cache a cada 30 segundos use (ttl=30)
     def fetch_all_data(_self):
         cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
         cursor.execute("SELECT temperatura, umidade, data FROM valores ORDER BY data DESC") # seleciona o 100 últimos valores de temperatura e data
@@ -21,7 +21,7 @@ class GraphGenerator:
         return df
 
     # Consulta o banco de dados para obter os dados das últimas 24 horas
-    @st.cache_data(ttl=30)  # Guarda os dados em um cache e Atualiza o cache a cada 30 segundos
+    @st.cache_data(ttl=120) #Guarda os dados em um cache. Para Atualiza o cache a cada 30 segundos use (ttl=30)
     def fetch_data_for_last_n_days(_self,num_days):
         end_data = datetime.now()
         start_date = end_data - timedelta(days=num_days)
@@ -33,7 +33,7 @@ class GraphGenerator:
         df = pd.DataFrame(data, columns=['temperatura','umidade','data'])
         return df
 
-    @st.cache_data(ttl=30) 
+    @st.cache_data(ttl=180) 
     def fetch_data_start_and_end(_self,start_date,end_date):
         cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
         query = f"SELECT temperatura, umidade, data FROM valores WHERE data >= '{start_date} 00:00:00' AND data <= '{end_date} 23:59:59' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
@@ -46,15 +46,13 @@ class GraphGenerator:
     # Cria o gráfico
     def create_graph(self,data,variavel):
 
-        #fig = px.line(data,x='data',y=['temperatura','umidade'],title='Evolução da temperatura e Umidade')
         fig = px.line(data,x='data',y=variavel)
         fig.update_traces(mode="markers+lines",hovertemplate=None) # Altera a visualização das informações no texto do mouser hover do gráfico
         fig.update_layout(
             hovermode="x unified",
-            #hovertemplate="<br>Data:%{x}<br>Temperatura: %{y:.2f}ºC<br>Umidade: %{customdata:.2f}%"
         )
         st.plotly_chart(fig)
-        #st.line_chart(data, x='data',y=['temperatura','umidade'])
+    
         st.write("Última atualização: ",data['data'].max())
 
         # Atualiza o Gráfico
@@ -66,6 +64,7 @@ class GraphGenerator:
     def update_graph(self):
         
         print('Passou pelo update_graph')
+        self.db.clean_duplicate_data_started()
         st.title("Gráfico de Monitoramento")
         df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
         #Botões para a seleção do intevalo
@@ -105,8 +104,10 @@ class GraphGenerator:
                 variavel = st.multiselect("Escolher variável",df.columns[mask],placeholder="Escolha uma opção")
                 if not variavel:
                     variavel=['temperatura','umidade'] #Se não for escolhido nenhuma variável no st.multiselect então a minha variavel vai receber os dois valores ['temperatura','umidade']
-
-            self.publish_button()
+            if self.mqtt_client.rele_ligado:
+                st.success("Relé: Ligado")
+            else:
+                st.error("Relé: Desligado")  
 
         self.create_graph(df,variavel)  
 
@@ -114,36 +115,30 @@ class GraphGenerator:
     #Publica uma mensagem para acionar o relé
     def publish_button(self):
 
-        st.header("Enviar mensagem")
-        col1,col2 = st.columns(2)
-        col11,col22 = st.columns(2)
-
-        with col1:
-            with col11:
+        with st.sidebar:
+            st.header("Enviar mensagem")
+            col1,col2 = st.columns(2)
+            col3,col4 = st.columns(2)
+            with col1:
                 #Aciona o relé
-                if st.button('Acionar Relé'):
-                    message = "l"
-                    self.mqtt_client.publish_message("monitoramento/publisher",message)
-            
-            with col22:
+                if st.button('Acionar Buzzer',on_click=self.publish_message_callback,args=("a")):
+                    pass
+            with col2:    
                 #Aciona o relé
-                if st.button('Desaciona Relé'):
-                    message = "d"
-                    self.mqtt_client.publish_message("monitoramento/publisher",message)
-
-        with col2:
-            with col11:
+                if st.button('Desaciona Buzzer',on_click=self.publish_message_callback,args=("p")):
+                    pass
+            with col3:
                 #Aciona o relé
-                if st.button('Acionar Buzzer'):
-                    message = "a"
-                    self.mqtt_client.publish_message("monitoramento/publisher",message)
-            
-            with col22:
+                if st.button('Acionar Relé',on_click=self.publish_message_callback,args=("l")):
+                    pass
+            with col4:    
                 #Aciona o relé
-                if st.button('Desaciona Buzzer'):
-                    message = "p"
-                    self.mqtt_client.publish_message("monitoramento/publisher",message)
+                if st.button('Desaciona Relé',on_click=self.publish_message_callback,args=("d")):
+                    pass
+                    
 
     
-
+    #Método de Callback para não reinicializar a página
+    def publish_message_callback(self,message):
+        self.mqtt_client.publish_message("monitoramento/publisher",message)
     

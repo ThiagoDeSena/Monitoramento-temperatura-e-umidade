@@ -9,6 +9,7 @@ class MqttClient:
         self.client.on_message = self.on_message
         self.client.connect(broker_address,port,keepalive)
         self.data_processor = data_processor
+        self.rele_ligado = False #Inicializa o estado do relé como desligado
 
     # Callback chamada quando a conexão com o broker é estabelecida
     def on_connect(self,client,userdata,flags,rc):
@@ -20,6 +21,7 @@ class MqttClient:
             client.subscribe("monitoramento/temperatura")
             client.subscribe("monitoramento/umidade")
             client.subscribe("monitoramento/heartbeat")
+            client.subscribe("monitoramento/rele")
         else:
             print(f"Falha ao conectar ao broker mqtt, código de retorno: {rc}")
 
@@ -31,8 +33,17 @@ class MqttClient:
         payload = msg.payload.decode("utf-8")
         print(f"Mensagem recebida: tópico = {topic}, payload = {payload}")
 
+        if topic == "monitoramento/rele":
+            self.rele_state(payload)
+
         #   Aqui você pode chamar a função de processamento de dados, passando o tópico e o payload
         self.data_processor.process_data(topic,payload)
+    
+    def rele_state(self,payload):
+        if payload.lower() == "ligado":
+            self.rele_ligado = True
+        elif payload.lower() == "desligado":
+            self.rele_ligado = False
 
     #   Inicia o loop do cliente MQTT, aguardando por novas mensagens 
     def start(self):
