@@ -5,8 +5,8 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
-const char* ssid = "ifce-espacoMaker";
-const char* password = "CR1AT1V1UM";
+const char* ssid = "REDE";
+const char* password = "SENHA";
 // const char* mqtt_server = "broker.hivemq.com"; //endereço do servidor MQTT online
 //const char* mqtt_server = "10.0.0.105"; //endereço do Raspberry
 const char* mqtt_server = "10.0.0.108"; //endereço do Raspberry
