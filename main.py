@@ -13,7 +13,7 @@ db = Database(host="localhost",user="user01",password="pi",database="monitoramen
 
 
 data_processor = DataProcessor(db)
-mqtt_client = MqttClient("10.0.0.108",data_processor=data_processor)
+mqtt_client = MqttClient("broker.hivemq.com",data_processor=data_processor)
 graphGenerator = GraphGenerator(db,mqtt_client)
 
 graphGenerator.update_graph()
