@@ -38,7 +38,8 @@ class MqttClient:
             self.rele_state(payload)
 
         #   Aqui você pode chamar a função de processamento de dados, passando o tópico e o payload
-        self.data_processor.process_data(topic,payload)
+        if self.data_processor:
+            self.data_processor.process_data(topic,payload)
     
     def rele_state(self,payload):
         if payload.lower() == "ligado":
