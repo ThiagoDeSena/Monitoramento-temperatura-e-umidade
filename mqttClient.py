@@ -7,6 +7,7 @@ class MqttClient:
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
+        self.client.on_disconnect = self.on_disconnect
         self.client.connect(broker_address,port,keepalive)
         self.data_processor = data_processor
         self.rele_ligado = False #Inicializa o estado do relé como desligado
@@ -47,9 +48,24 @@ class MqttClient:
 
     #   Inicia o loop do cliente MQTT, aguardando por novas mensagens 
     def start(self):
-        self.client.loop_forever()
+        #self.client.loop_forever()
+        self.client.loop_start() # Inicia o loop MQTT em uma thread separada e não bloqueia o resto da aplicação
 
     #Publica uma messagem no topico passado
     def publish_message(self,topic,message):
         self.client.publish(topic,message)
         print(f"Messagem publicada no tópico {topic}: {message}")
+
+    
+    def on_disconnect(self, client, userdata, rc):
+        print(f"[MQTT] Desconectado do broker! Código rc = {rc}")
+        if rc != 0:
+            while True:
+                try:
+                    print("[MQTT] Tentando reconectar...")
+                    client.reconnect()
+                    print("[MQTT] Reconectado com sucesso!")
+                    break
+                except Exception as e:
+                    print(f"[MQTT] Erro ao tentar reconectar: {e}")
+                    time.sleep(5)  # espera 5 segundos antes de tentar de novo

@@ -13,23 +13,21 @@ class DataProcessor:
         }
 
     # Verifica o tópico e insere o valor no banco de dados
-    def process_data(self,topic,payload):
-    
-        self.data_to_insert[topic]=payload  # Atribui o dicionário daquele tópico a sua mensagem
-    
-        if self.data_to_insert["monitoramento/temperatura"] is not None and \
-           self.data_to_insert["monitoramento/umidade"] is not None:
-            temperatura = self.data_to_insert["monitoramento/temperatura"]
-            umidade = self.data_to_insert["monitoramento/umidade"]
+    def process_data(self, topic, payload):
+        if topic == "monitoramento/temperatura":
+            self.data_to_insert["monitoramento/temperatura"] = payload
+        elif topic == "monitoramento/umidade":
+            self.data_to_insert["monitoramento/umidade"] = payload
 
-            #Verifica se os valores de temperatura ou umidade são diferentes dos valores anteriores para salvar no banco
+        temperatura = self.data_to_insert["monitoramento/temperatura"]
+        umidade = self.data_to_insert["monitoramento/umidade"]
+
+        if temperatura is not None and umidade is not None:
             if temperatura != self.previous_values["temperatura"] or umidade != self.previous_values["umidade"]:
-                timestamp = datetime.datetime.now()
-                timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
-                self.db.insert_into_database(temperatura, umidade,timestamp_str)
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.db.insert_into_database(temperatura, umidade, timestamp)
                 self.previous_values["temperatura"] = temperatura
                 self.previous_values["umidade"] = umidade
-    
 
         if topic == "monitoramento/heartbeat":
             print(payload)
