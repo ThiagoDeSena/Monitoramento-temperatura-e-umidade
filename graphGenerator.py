@@ -41,18 +41,63 @@ class GraphGenerator:
         return self.run_query(query)
 
     # Cria o gráfico
-    def create_graph(self,data,variavel):
+    def create_graph(self, data, variavel):
+        import plotly.graph_objects as go
 
-        fig = px.line(data,x='data',y=variavel)
-        fig.update_traces(mode="markers+lines",hovertemplate=None) # Altera a visualização das informações no texto do mouser hover do gráfico
+        fig = go.Figure()
+
+        if 'temperatura' in variavel:
+            fig.add_trace(go.Scatter(
+                x=data["data"],
+                y=data["temperatura"],
+                mode="lines+markers",
+                name="🌡️ Temperatura (°C)",
+                yaxis="y1",
+                line=dict(color="red")
+            ))
+
+        if 'umidade' in variavel:
+            fig.add_trace(go.Scatter(
+                x=data["data"],
+                y=data["umidade"],
+                mode="lines+markers",
+                name="💧 Umidade (%)",
+                yaxis="y2",
+                line=dict(color="blue")
+            ))
+
         fig.update_layout(
-            hovermode="x unified",
+            #title_text="Histórico de Temperatura e Umidade",
+            #title_font=dict(size=20),
+            margin=dict(t=70),  # margem superior maior para não sobrepor a legenda
+            xaxis=dict(
+                title="Data",
+                showgrid=False,
+                rangeslider=dict(visible=False),  # ✅ desativa o gráfico pequeno abaixo
+                type="date"
+            ),
+            yaxis=dict(
+                title="Temperatura (°C)",
+                titlefont=dict(color="red"),
+                tickfont=dict(color="red")
+            ),
+            yaxis2=dict(
+                title="Umidade (%)",
+                titlefont=dict(color="blue"),
+                tickfont=dict(color="blue"),
+                overlaying="y",
+                side="right"
+            ),
+            legend=dict(orientation="h", yanchor="bottom", y=1.15, xanchor="left", x=0),
+            hovermode="x unified"
         )
-        st.plotly_chart(fig)
 
-        # Atualiza o Gráfico
-        if st.button('Atualizar Gráfico'):
+        st.plotly_chart(fig, use_container_width=True)
+
+
+        if st.button("Atualizar Gráfico"):
             st.rerun()
+
       
     
     # Atualiza o gráfico com os valores novos
