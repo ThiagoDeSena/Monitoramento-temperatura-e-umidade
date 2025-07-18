@@ -157,6 +157,21 @@ class GraphGenerator:
     # Publica uma mensagem para acionar o relé
     def publish_button(self):
         with st.sidebar:
+            st.divider()
+            st.subheader("🔧 Configurar Controle")
+
+            # Entradas numéricas com valores padrão e limites
+            setpoint = st.number_input("🌡️ Setpoint de Temperatura (°C)", min_value=0.0, max_value=100.0, value=40.0, step=0.5)
+            histerese = st.number_input("🔁 Histerese (°C)", min_value=0.0, max_value=20.0, value=2.0, step=0.1)
+
+            if st.button("✅ Enviar Setpoint/Histerese", use_container_width=True):
+                try:
+                    self.mqtt_client.publish_message("monitoramento/setpoint", str(setpoint))
+                    self.mqtt_client.publish_message("monitoramento/histerese", str(histerese))
+                    st.success(f"Setpoint ({setpoint} °C) e Histerese ({histerese} °C) enviados com sucesso!")
+                except Exception as e:
+                    st.error(f"Erro ao enviar: {e}")
+
             st.divider()  # Separador visual
             st.subheader("Enviar mensagem")
 
