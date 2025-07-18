@@ -25,7 +25,8 @@ class GraphGenerator:
     def fetch_data_for_last_n_days(_self,num_days):
         end_data = datetime.now()
         start_date = end_data - timedelta(days=num_days)
-        cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
+        _self.db.reconnect_if_needed() # Garante que a conexão ainda está viva
+        cursor = _self.db.conexao.cursor()  #Acesso o cursor do banco
         query = f"SELECT temperatura, umidade, data FROM valores WHERE data >= '{start_date:%Y-%m-%d %H:%M:%S}' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
         cursor.execute(query) # seleciona o 100 últimos valores de temperatura e data
         data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
