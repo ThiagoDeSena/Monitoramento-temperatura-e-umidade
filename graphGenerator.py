@@ -13,7 +13,8 @@ class GraphGenerator:
     # Consulta o banco de dados para obter todos dados
     @st.cache_data(ttl=3600)   # Guarda os dados em um cache. Para Atualiza o cache a cada 30 segundos use (ttl=30)
     def fetch_all_data(_self):
-        cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
+        _self.db.reconnect_if_needed() # Garante que a conexão ainda está viva
+        cursor = _self.db.conexao.cursor()  #Acesso o cursor do banco
         cursor.execute("SELECT temperatura, umidade, data FROM valores ORDER BY data DESC") # seleciona o 100 últimos valores de temperatura e data
         data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
         #Cria um DataFrame a partir dos resultados da consulta
@@ -36,7 +37,8 @@ class GraphGenerator:
 
     @st.cache_data(ttl=180) 
     def fetch_data_start_and_end(_self,start_date,end_date):
-        cursor = _self.db.conecao.cursor()  #Acesso o cursor do banco
+        _self.db.reconnect_if_needed() # Garante que a conexão ainda está viva
+        cursor = _self.db.conexao.cursor()  #Acesso o cursor do banco
         query = f"SELECT temperatura, umidade, data FROM valores WHERE data >= '{start_date} 00:00:00' AND data <= '{end_date} 23:59:59' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
         cursor.execute(query) # seleciona o 100 últimos valores de temperatura e data
         data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'

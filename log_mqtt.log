@@ -5029,3 +5029,125 @@ Iniciando loop MQTT no serviço separado...
 [2025-07-18 14:52:11] Heartbeat: 18/07/2025 14:52:10
 [MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 42.20
 2025-07-18 14:52:41.673666 - Dado inserido: T=28.70, U=42.20
+[2025-07-18 14:52:41] Dados salvos: T=28.70, U=42.20
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:52:41
+[2025-07-18 14:52:41] Heartbeat: 18/07/2025 14:52:41
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 27.80
+2025-07-18 14:52:57.731305 - Dado inserido: T=27.80, U=42.20
+[2025-07-18 14:52:57] Dados salvos: T=27.80, U=42.20
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:52:57
+[2025-07-18 14:52:57] Heartbeat: 18/07/2025 14:52:57
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 43.60
+2025-07-18 14:53:09.929207 - Dado inserido: T=27.80, U=43.60
+[2025-07-18 14:53:09] Dados salvos: T=27.80, U=43.60
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:53:09
+[2025-07-18 14:53:09] Heartbeat: 18/07/2025 14:53:09
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 45.00
+2025-07-18 14:54:11.883320 - Dado inserido: T=27.80, U=45.00
+2025-07-18 14:54:15.393147 - Duplicatas removidas com sucesso
+[2025-07-18 14:54:11] Dados salvos: T=27.80, U=45.00
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:54:11
+[2025-07-18 14:54:15] Heartbeat: 18/07/2025 14:54:11
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 26.90
+2025-07-18 14:54:15.726981 - Dado inserido: T=26.90, U=45.00
+[2025-07-18 14:54:15] Dados salvos: T=26.90, U=45.00
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:54:11
+[2025-07-18 14:54:15] Heartbeat: 18/07/2025 14:54:11
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 46.40
+2025-07-18 14:54:49.991315 - Dado inserido: T=26.90, U=46.40
+[2025-07-18 14:54:49] Dados salvos: T=26.90, U=46.40
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:54:49
+[2025-07-18 14:54:49] Heartbeat: 18/07/2025 14:54:49
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 47.80
+2025-07-18 14:56:04.233649 - Dado inserido: T=26.90, U=47.80
+[2025-07-18 14:56:03] Dados salvos: T=26.90, U=47.80
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:56:03
+[2025-07-18 14:56:04] Heartbeat: 18/07/2025 14:56:03
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 26.00
+2025-07-18 14:56:06.064909 - Dado inserido: T=26.00, U=47.80
+[2025-07-18 14:56:05] Dados salvos: T=26.00, U=47.80
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:56:04
+[2025-07-18 14:56:06] Heartbeat: 18/07/2025 14:56:04
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 49.70
+2025-07-18 14:57:00.444140 - Dado inserido: T=26.00, U=49.70
+[2025-07-18 14:57:00] Dados salvos: T=26.00, U=49.70
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:56:59
+[2025-07-18 14:57:00] Heartbeat: 18/07/2025 14:56:59
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 51.20
+2025-07-18 14:57:12.252118 - Dado inserido: T=26.00, U=51.20
+[2025-07-18 14:57:11] Dados salvos: T=26.00, U=51.20
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:57:11
+[2025-07-18 14:57:12] Heartbeat: 18/07/2025 14:57:11
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 49.60
+2025-07-18 14:57:36.274557 - Dado inserido: T=26.00, U=49.60
+[2025-07-18 14:57:35] Dados salvos: T=26.00, U=49.60
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:57:35
+[2025-07-18 14:57:36] Heartbeat: 18/07/2025 14:57:35
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 25.20
+2025-07-18 14:58:44.490364 - Dado inserido: T=25.20, U=49.60
+[2025-07-18 14:58:44] Dados salvos: T=25.20, U=49.60
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 14:58:44
+[2025-07-18 14:58:44] Heartbeat: 18/07/2025 14:58:44
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 50.90
+2025-07-18 15:07:36.244540 - Dado inserido: T=25.20, U=50.90
+[2025-07-18 15:07:35] Dados salvos: T=25.20, U=50.90
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:07:35
+[2025-07-18 15:07:36] Heartbeat: 18/07/2025 15:07:35
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 24.60
+2025-07-18 15:08:44.375482 - Dado inserido: T=24.60, U=50.90
+[2025-07-18 15:08:44] Dados salvos: T=24.60, U=50.90
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:08:44
+[2025-07-18 15:08:44] Heartbeat: 18/07/2025 15:08:44
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 25.40
+2025-07-18 15:12:15.850531 - Dado inserido: T=25.40, U=50.90
+[2025-07-18 15:12:15] Dados salvos: T=25.40, U=50.90
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:12:15
+[2025-07-18 15:12:15] Heartbeat: 18/07/2025 15:12:15
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 49.20
+2025-07-18 15:12:23.962612 - Dado inserido: T=25.40, U=49.20
+[2025-07-18 15:12:23] Dados salvos: T=25.40, U=49.20
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:12:22
+[2025-07-18 15:12:23] Heartbeat: 18/07/2025 15:12:22
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 47.70
+2025-07-18 15:12:51.917577 - Dado inserido: T=25.40, U=47.70
+[2025-07-18 15:12:51] Dados salvos: T=25.40, U=47.70
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:12:51
+[2025-07-18 15:12:51] Heartbeat: 18/07/2025 15:12:51
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 26.20
+2025-07-18 15:12:52.282569 - Dado inserido: T=26.20, U=47.70
+[2025-07-18 15:12:51] Dados salvos: T=26.20, U=47.70
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:12:51
+[2025-07-18 15:12:52] Heartbeat: 18/07/2025 15:12:51
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 46.10
+2025-07-18 15:13:24.065884 - Dado inserido: T=26.20, U=46.10
+[2025-07-18 15:13:23] Dados salvos: T=26.20, U=46.10
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:13:23
+[2025-07-18 15:13:24] Heartbeat: 18/07/2025 15:13:23
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 27.00
+2025-07-18 15:13:42.047640 - Dado inserido: T=27.00, U=46.10
+[2025-07-18 15:13:41] Dados salvos: T=27.00, U=46.10
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:13:41
+[2025-07-18 15:13:42] Heartbeat: 18/07/2025 15:13:41
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 44.70
+2025-07-18 15:14:06.171754 - Dado inserido: T=27.00, U=44.70
+[2025-07-18 15:14:05] Dados salvos: T=27.00, U=44.70
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:14:05
+[2025-07-18 15:14:06] Heartbeat: 18/07/2025 15:14:05
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 43.30
+2025-07-18 15:15:08.258374 - Dado inserido: T=27.00, U=43.30
+[2025-07-18 15:15:07] Dados salvos: T=27.00, U=43.30
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:15:08
+[2025-07-18 15:15:08] Heartbeat: 18/07/2025 15:15:08
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 27.90
+2025-07-18 15:15:08.618319 - Dado inserido: T=27.90, U=43.30
+[2025-07-18 15:15:08] Dados salvos: T=27.90, U=43.30
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:15:08
+[2025-07-18 15:15:08] Heartbeat: 18/07/2025 15:15:08
+[MQTT] Mensagem recebida - Tópico: monitoramento/umidade | Payload: 42.00
+2025-07-18 15:16:20.398311 - Dado inserido: T=27.90, U=42.00
+[2025-07-18 15:16:19] Dados salvos: T=27.90, U=42.00
+[MQTT] Mensagem recebida - Tópico: monitoramento/heartbeat | Payload: 18/07/2025 15:16:20
+[2025-07-18 15:16:20] Heartbeat: 18/07/2025 15:16:20
+[MQTT] Mensagem recebida - Tópico: monitoramento/temperatura | Payload: 28.80
+2025-07-18 15:17:22.467022 - Dado inserido: T=28.80, U=42.00
+[2025-07-18 15:17:22] Dados salvos: T=28.80, U=42.00
