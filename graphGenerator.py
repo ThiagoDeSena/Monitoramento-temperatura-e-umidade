@@ -10,41 +10,35 @@ class GraphGenerator:
         self.db = database
         self.mqtt_client = mqttClient
 
+    def run_query(self, query):
+        """Executa uma consulta SQL e retorna um DataFrame."""
+        try:
+            self.db.reconnect_if_needed()
+            cursor = self.db.conexao.cursor()
+            cursor.execute(query)
+            data = cursor.fetchall()
+            return pd.DataFrame(data, columns=["temperatura", "umidade", "data"])
+        except Exception as e:
+            st.error(f"Erro ao executar consulta: {e}")
+            return pd.DataFrame(columns=["temperatura", "umidade", "data"])
+        
+
     # Consulta o banco de dados para obter todos dados
-    @st.cache_data(ttl=3600)   # Guarda os dados em um cache. Para Atualiza o cache a cada 30 segundos use (ttl=30)
-    def fetch_all_data(_self):
-        _self.db.reconnect_if_needed() # Garante que a conexão ainda está viva
-        cursor = _self.db.conexao.cursor()  #Acesso o cursor do banco
-        cursor.execute("SELECT temperatura, umidade, data FROM valores ORDER BY data DESC") # seleciona o 100 últimos valores de temperatura e data
-        data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
-        #Cria um DataFrame a partir dos resultados da consulta
-        df = pd.DataFrame(data, columns=['temperatura','umidade','data'])
-        return df
+    def fetch_all_data(self):
+        query = "SELECT temperatura, umidade, data FROM valores ORDER BY data DESC" # seleciona o 100 últimos valores de temperatura e data
+        return self.run_query(query)
 
     # Consulta o banco de dados para obter os dados das últimas 24 horas
-    @st.cache_data(ttl=120) #Guarda os dados em um cache. Para Atualiza o cache a cada 30 segundos use (ttl=30)
-    def fetch_data_for_last_n_days(_self,num_days):
+    def fetch_data_for_last_n_days(self,num_days):
         end_data = datetime.now()
         start_date = end_data - timedelta(days=num_days)
-        _self.db.reconnect_if_needed() # Garante que a conexão ainda está viva
-        cursor = _self.db.conexao.cursor()  #Acesso o cursor do banco
         query = f"SELECT temperatura, umidade, data FROM valores WHERE data >= '{start_date:%Y-%m-%d %H:%M:%S}' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
-        cursor.execute(query) # seleciona o 100 últimos valores de temperatura e data
-        data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
-        #Cria um DataFrame a partir dos resultados da consulta
-        df = pd.DataFrame(data, columns=['temperatura','umidade','data'])
-        return df
+        return self.run_query(query)
 
-    @st.cache_data(ttl=180) 
-    def fetch_data_start_and_end(_self,start_date,end_date):
-        _self.db.reconnect_if_needed() # Garante que a conexão ainda está viva
-        cursor = _self.db.conexao.cursor()  #Acesso o cursor do banco
+    # Consulta os valores selecionados entre datas que o usuário selecionou
+    def fetch_data_start_and_end(self,start_date,end_date):
         query = f"SELECT temperatura, umidade, data FROM valores WHERE data >= '{start_date} 00:00:00' AND data <= '{end_date} 23:59:59' ORDER BY data DESC" #Precisa usar o f antes para saber que ali dentro terá uma variável
-        cursor.execute(query) # seleciona o 100 últimos valores de temperatura e data
-        data = cursor.fetchall()    #Coloco os valores selecionados na variável 'data'
-        #Cria um DataFrame a partir dos resultados da consulta
-        df = pd.DataFrame(data, columns=['temperatura','umidade','data'])
-        return df
+        return self.run_query(query)
 
     # Cria o gráfico
     def create_graph(self,data,variavel):
@@ -55,8 +49,6 @@ class GraphGenerator:
             hovermode="x unified",
         )
         st.plotly_chart(fig)
-    
-        st.write("Última atualização: ",data['data'].max())
 
         # Atualiza o Gráfico
         if st.button('Atualizar Gráfico'):
@@ -70,6 +62,7 @@ class GraphGenerator:
         self.db.clean_duplicate_data_started()
         st.title("Gráfico de Monitoramento")
         df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
+        self.show_latest_readings(df)
         #Botões para a seleção do intevalo
         with st.sidebar:
             st.header("Selecionar Período")
@@ -112,32 +105,46 @@ class GraphGenerator:
             else:
                 st.error("Relé: Desligado")  
 
+        st.divider()  # separa o título da parte interativa de filtro
         self.create_graph(df,variavel)  
 
 
-    #Publica uma mensagem para acionar o relé
+    # Publica uma mensagem para acionar o relé
     def publish_button(self):
-
         with st.sidebar:
-            st.header("Enviar mensagem")
-            col1,col2 = st.columns(2)
-            col3,col4 = st.columns(2)
+            st.divider()  # Separador visual
+            st.subheader("Enviar mensagem")
+
+            col1, col2 = st.columns(2)
+            
             with col1:
-                #Aciona o relé
-                if st.button('Acionar Buzzer',on_click=self.publish_message_callback,args=("a")):
-                    pass
-            with col2:    
-                #Aciona o relé
-                if st.button('Desaciona Buzzer',on_click=self.publish_message_callback,args=("p")):
-                    pass
-            with col3:
-                #Aciona o relé
-                if st.button('Acionar Relé',on_click=self.publish_message_callback,args=("l")):
-                    pass
-            with col4:    
-                #Aciona o relé
-                if st.button('Desaciona Relé',on_click=self.publish_message_callback,args=("d")):
-                    pass
+                st.button(
+                    'Acionar Buzzer',
+                    on_click=self.publish_message_callback,
+                    args=("a",),
+                    use_container_width=True
+                )
+                st.button(
+                    'Acionar Relé',
+                    on_click=self.publish_message_callback,
+                    args=("l",),
+                    use_container_width=True
+                )
+            
+            with col2:
+                st.button(
+                    'Desaciona Buzzer',
+                    on_click=self.publish_message_callback,
+                    args=("p",),
+                    use_container_width=True
+                )
+                st.button(
+                    'Desaciona Relé',
+                    on_click=self.publish_message_callback,
+                    args=("d",),
+                    use_container_width=True
+                )
+
                     
 
     
@@ -145,3 +152,24 @@ class GraphGenerator:
     def publish_message_callback(self,message):
         self.mqtt_client.publish_message("monitoramento/publisher",message)
     
+    def show_latest_readings(self, df):
+        """Exibe as últimas leituras de temperatura e umidade em destaque."""
+        if df.empty:
+            st.warning("Nenhum dado disponível para exibir.")
+            return
+
+        latest = df.iloc[0]
+        temperatura = latest["temperatura"]
+        umidade = latest["umidade"]
+        data = latest["data"]
+
+        st.divider()
+        st.subheader("📊 Última Leitura")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("🌡️ Temperatura (°C)", f"{temperatura}")
+        with col2:
+            st.metric("💧 Umidade (%)", f"{umidade}")
+        with col3:
+            st.write(f"🕒 {data}")
