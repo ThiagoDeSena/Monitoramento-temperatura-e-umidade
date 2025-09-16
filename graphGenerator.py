@@ -78,12 +78,12 @@ class GraphGenerator:
             ),
             yaxis=dict(
                 title="Temperatura (°C)",
-                titlefont=dict(color="red"),
+                title_font=dict(color="red"),
                 tickfont=dict(color="red")
             ),
             yaxis2=dict(
                 title="Umidade (%)",
-                titlefont=dict(color="blue"),
+                title_font=dict(color="blue"),
                 tickfont=dict(color="blue"),
                 overlaying="y",
                 side="right"
