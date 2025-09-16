@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ambiente Virtual
-AMBIENTE_VIRTUAL="/home/pi/ProgramasRasp/Monitoramento_Estufa/venv1"
+AMBIENTE_VIRTUAL="/home/pi/ProgramasRasp/Monitoramento_Estufa/venv"
 
 # CAminho dos Scripts
 SCRIPT_PYTHON="/home/pi/ProgramasRasp/Monitoramento_Estufa/main.py"
