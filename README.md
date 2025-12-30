@@ -2,6 +2,10 @@
 
 ![20250718_145217(2)](https://github.com/user-attachments/assets/162769d0-29eb-46ba-a0fd-8e173c12d440)
 
+## Link do Projeto em Tempo Real
+
+[Click no Link para acessar o Monitoramento em Tempo Real](https://thiagodesena.github.io/raspberry-pi/)
+
 ## 📌 Descrição do Projeto
 
 Este projeto desenvolve um sistema de aquecimento e monitoramento *in situ* para a conservação de filamentos de PLA utilizados em impressão 3D. A solução proposta substitui estufas comerciais caras, oferecendo um controle local e automatizado de temperatura e umidade, com monitoramento em tempo real via IoT, garantindo maior vida útil e qualidade do material.
