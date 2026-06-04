@@ -74,6 +74,8 @@ class Database:
         cursor = None
         try:
             cursor = self.conexao.cursor()
+            # Define timeout menor para não travar a aplicação
+            cursor.execute("SET innodb_lock_wait_timeout = 5")
             cursor.execute("""
                 DELETE t1
                 FROM valores t1
@@ -87,7 +89,11 @@ class Database:
             self.conexao.commit()
             print(f"{datetime.datetime.now()} - Duplicatas removidas com sucesso")
         except mariadb.Error as e:
-            print(f"{datetime.datetime.now()} - Erro ao remover duplicatas: {e}")
+            print(f"{datetime.datetime.now()} - Erro ao remover duplicatas (ignorado): {e}")
+            try:
+                self.conexao.rollback()  # Libera o lock imediatamente
+            except:
+                pass
         finally:
             if cursor:
                 cursor.close()

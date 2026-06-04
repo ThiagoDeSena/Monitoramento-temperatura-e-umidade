@@ -199,7 +199,12 @@ class GraphGenerator:
 
     def update_graph(self):
         print('Passou pelo update_graph')
-        self.db.clean_duplicate_data_started()
+        
+        # Roda limpeza só uma vez por sessão, não a cada rerun
+        if "limpeza_feita" not in st.session_state:
+            self.db.clean_duplicate_data_started()
+            st.session_state.limpeza_feita = True
+        
         st.title("Gráfico de Monitoramento")
 
         # Garante que o período escolhido sobrevive ao rerun

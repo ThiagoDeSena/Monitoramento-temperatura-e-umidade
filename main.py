@@ -27,5 +27,15 @@ mqtt_client = st.session_state.mqtt_client
 
 # Interface gráfica
 graph = GraphGenerator(db, mqtt_client)
-graph.update_graph()
-graph.publish_button()
+
+try:
+    graph.update_graph()
+except Exception as e:
+    st.error(f"Erro no update_graph: {e}")
+    st.exception(e)  # Mostra o traceback completo na tela
+
+try:
+    graph.publish_button()
+except Exception as e:
+    st.error(f"Erro no publish_button: {e}")
+    st.exception(e)
