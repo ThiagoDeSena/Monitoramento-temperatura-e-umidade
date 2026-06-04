@@ -147,7 +147,9 @@ class GraphGenerator:
     # Atualiza o gráfico com os valores novos
     def update_graph(self):
         
-        print('Passou pelo update_graph')
+        count = st_autorefresh(interval=10000, limit=None, key="fivedatarefresh")
+        
+        print('Passou pelo update_graph - Atualização nº: {count}')
         self.db.clean_duplicate_data_started()
         st.title("Gráfico de Monitoramento")
         df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
@@ -195,6 +197,10 @@ class GraphGenerator:
                 st.error("Relé: Desligado")  
 
         st.divider()  # separa o título da parte interativa de filtro
+        
+        if 'variavel' not in locals():
+            variavel = ['temperatura', 'umidade']
+            
         self.create_graph(df,variavel)  
 
 
