@@ -10,6 +10,54 @@ class GraphGenerator:
         self.db = database
         self.mqtt_client = mqttClient
 
+    def show_setpoint_histerese(self):
+        """Exibe os valores atuais de setpoint e histerese de forma visual."""
+        config = self.db.get_latest_setpoint_histerese()
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if config["setpoint"] is not None:
+                st.metric(
+                    label="🎯 Setpoint",
+                    value=f"{config['setpoint']:.1f}°C",
+                    delta=None
+                )
+            else:
+                st.metric(
+                    label="🎯 Setpoint",
+                    value="--",
+                    delta=None
+                )
+        
+        with col2:
+            if config["histerese"] is not None:
+                st.metric(
+                    label="📊 Histerese",
+                    value=f"{config['histerese']:.1f}°C",
+                    delta=None
+                )
+            else:
+                st.metric(
+                    label="📊 Histerese",
+                    value="--",
+                    delta=None
+                )
+        
+        with col3:
+            if config["data_atualizacao"] is not None:
+                st.metric(
+                    label="⏰ Atualizado em",
+                    value=f"{config['data_atualizacao']}",
+                    delta=None
+                )
+            else:
+                st.metric(
+                    label="⏰ Atualizado em",
+                    value="--",
+                    delta=None
+                )
+
     def run_query(self, query):
         """Executa uma consulta SQL e retorna um DataFrame."""
         try:
@@ -233,3 +281,7 @@ class GraphGenerator:
             st.metric("💧 Umidade (%)", f"{umidade}")
         with col3:
             st.write(f"🕒 {data}")
+        
+        # Mostra setpoint e histerese logo abaixo
+        st.subheader("⚙️ Configurações Atuais")
+        self.show_setpoint_histerese()

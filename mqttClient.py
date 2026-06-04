@@ -15,7 +15,9 @@ class MqttClient:
             "monitoramento/temperatura",
             "monitoramento/umidade",
             "monitoramento/heartbeat",
-            "monitoramento/rele"
+            "monitoramento/rele",
+            "monitoramento/setpoint",
+            "monitoramento/histerese"
         ]
 
         self.client = mqtt.Client()

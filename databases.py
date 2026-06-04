@@ -96,6 +96,65 @@ class Database:
         if self.insertion_count == 0:
             self.clean_duplicate_data()
 
+    def update_setpoint_histerese(self, setpoint=None, histerese=None):
+        """Atualiza os valores de setpoint e/ou histerese na tabela configuracoes."""
+        self.reconnect_if_needed()
+        cursor = None
+        try:
+            cursor = self.conexao.cursor()
+            if setpoint is not None and histerese is not None:
+                cursor.execute(
+                    "UPDATE configuracoes SET setpoint=%s, histerese=%s WHERE id=1",
+                    (setpoint, histerese)
+                )
+            elif setpoint is not None:
+                cursor.execute(
+                    "UPDATE configuracoes SET setpoint=%s WHERE id=1",
+                    (setpoint,)
+                )
+            elif histerese is not None:
+                cursor.execute(
+                    "UPDATE configuracoes SET histerese=%s WHERE id=1",
+                    (histerese,)
+                )
+            self.conexao.commit()
+            print(f"{datetime.datetime.now()} - Configurações atualizadas: setpoint={setpoint}, histerese={histerese}")
+        except mariadb.Error as e:
+            print(f"{datetime.datetime.now()} - Erro ao atualizar configurações: {e}")
+        finally:
+            if cursor:
+                cursor.close()
+
+    def get_latest_setpoint_histerese(self):
+        """Recupera os últimos valores de setpoint e histerese."""
+        self.reconnect_if_needed()
+        cursor = None
+        try:
+            cursor = self.conexao.cursor()
+            cursor.execute("SELECT setpoint, histerese, data_atualizacao FROM configuracoes WHERE id=1")
+            result = cursor.fetchone()
+            if result:
+                return {
+                    "setpoint": result[0],
+                    "histerese": result[1],
+                    "data_atualizacao": result[2]
+                }
+            return {
+                "setpoint": None,
+                "histerese": None,
+                "data_atualizacao": None
+            }
+        except mariadb.Error as e:
+            print(f"{datetime.datetime.now()} - Erro ao recuperar configurações: {e}")
+            return {
+                "setpoint": None,
+                "histerese": None,
+                "data_atualizacao": None
+            }
+        finally:
+            if cursor:
+                cursor.close()
+
     def close_connection(self):
         if self.conexao:
             self.conexao.close()

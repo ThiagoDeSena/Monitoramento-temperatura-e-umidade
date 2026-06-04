@@ -5,11 +5,15 @@ class DataProcessor:
         self.db = database
         self.current_values = {
             "temperatura": None,
-            "umidade": None
+            "umidade": None,
+            "setpoint": None,
+            "histerese": None
         }
         self.last_saved_values = {
             "temperatura": None,
-            "umidade": None
+            "umidade": None,
+            "setpoint": None,
+            "histerese": None
         }
 
     def process_data(self, topic, payload):
@@ -20,6 +24,30 @@ class DataProcessor:
 
         elif topic == "monitoramento/umidade":
             self.current_values["umidade"] = payload
+
+        elif topic == "monitoramento/setpoint":
+            self.current_values["setpoint"] = payload
+            # Salva setpoint imediatamente (não espera ter temperatura+umidade)
+            if payload != self.last_saved_values["setpoint"]:
+                try:
+                    self.db.update_setpoint_histerese(setpoint=payload)
+                    self.last_saved_values["setpoint"] = payload
+                    print(f"[{now}] Setpoint atualizado: {payload}")
+                except Exception as e:
+                    print(f"[{now}] Erro ao atualizar setpoint: {e}")
+            return
+
+        elif topic == "monitoramento/histerese":
+            self.current_values["histerese"] = payload
+            # Salva histerese imediatamente (não espera ter temperatura+umidade)
+            if payload != self.last_saved_values["histerese"]:
+                try:
+                    self.db.update_setpoint_histerese(histerese=payload)
+                    self.last_saved_values["histerese"] = payload
+                    print(f"[{now}] Histerese atualizada: {payload}")
+                except Exception as e:
+                    print(f"[{now}] Erro ao atualizar histerese: {e}")
+            return
 
         elif topic == "monitoramento/heartbeat":
             print(f"[{now}] Heartbeat: {payload}")
