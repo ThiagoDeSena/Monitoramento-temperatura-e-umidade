@@ -2,17 +2,10 @@ import streamlit as st
 from databases import Database
 from mqttClient import MqttClient
 from graphGenerator import GraphGenerator
+from streamlit_autorefresh import st_autorefresh
 
-# Configuração da página (DEVE ser o primeiro comando Streamlit do arquivo)
+# Configuração da página (Deve ser o primeiro comando)
 st.set_page_config(page_title="Monitoramento Estufa", layout="wide")
-
-# 🔄 TIMER DE ATUALIZAÇÃO AUTOMÁTICA
-# Esse fragmento roda silenciosamente a cada 10 segundos e força o script a reiniciar
-@st.fragment(run_every=10)
-def disparar_atualizacao_global():
-    st.rerun()
-
-disparar_atualizacao_global()
 
 # Cria conexão com o banco
 db = Database(host="localhost", user="user01", password="pi", database="monitoramento")
@@ -24,3 +17,7 @@ mqtt_client = MqttClient("localhost")  # sem data_processor, não vai escutar na
 graph = GraphGenerator(db, mqtt_client)
 graph.update_graph()
 graph.publish_button()
+
+# 🔄 ATUALIZAÇÃO AUTOMÁTICA (Colocada ao final do script)
+# interval=10000 significa 10 segundos. key é um identificador único.
+st_autorefresh(interval=10000, limit=None, key="atualizador_estufa")
