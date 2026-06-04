@@ -54,13 +54,21 @@ class GraphGenerator:
             else:
                 st.write("🕒 --")
 
+    # def run_query(self, query):
+    #     """Executa uma consulta SQL e retorna um DataFrame."""
+    #     try:
+    #         self.db.reconnect_if_needed()
+    #         cursor = self.db.conexao.cursor()
+    #         cursor.execute(query)
+    #         data = cursor.fetchall()
+    #         return pd.DataFrame(data, columns=["temperatura", "umidade", "data"])
+    #     except Exception as e:
+    #         st.error(f"Erro ao executar consulta: {e}")
+    #         return pd.DataFrame(columns=["temperatura", "umidade", "data"])
+        
     def run_query(self, query):
-        """Executa uma consulta SQL e retorna um DataFrame."""
         try:
-            self.db.reconnect_if_needed()
-            cursor = self.db.conexao.cursor()
-            cursor.execute(query)
-            data = cursor.fetchall()
+            data = self.db.run_query(query)
             return pd.DataFrame(data, columns=["temperatura", "umidade", "data"])
         except Exception as e:
             st.error(f"Erro ao executar consulta: {e}")

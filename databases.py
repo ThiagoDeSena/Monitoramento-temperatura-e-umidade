@@ -1,6 +1,7 @@
 import mariadb
 import datetime
 import time
+import threading
 
 class Database:
 
@@ -14,6 +15,7 @@ class Database:
         self.conexao = None
         self.insertion_count = 0
         self.max_insertions = 100
+        self._lock = threading.Lock()
         self.connect()
 
     def connect(self):
@@ -37,44 +39,74 @@ class Database:
 
     def insert_into_database(self, temperatura, umidade, timestamp):
         """Insere dados no banco evitando duplicatas e tratando erros."""
-        self.reconnect_if_needed()
-        cursor = None
-        try:
-            cursor = self.conexao.cursor()
+        with self._lock:
+            self.reconnect_if_needed()
+            cursor = None
+            try:
+                cursor = self.conexao.cursor()
 
-            # Verifica duplicidade
-            cursor.execute(
-                "SELECT 1 FROM valores WHERE temperatura=%s AND umidade=%s AND data=%s LIMIT 1",
-                (temperatura, umidade, timestamp)
-            )
-            if not cursor.fetchone():
+                # Verifica duplicidade
                 cursor.execute(
-                    "INSERT INTO valores (temperatura, umidade, data) VALUES (%s, %s, %s)",
+                    "SELECT 1 FROM valores WHERE temperatura=%s AND umidade=%s AND data=%s LIMIT 1",
                     (temperatura, umidade, timestamp)
                 )
-                self.conexao.commit()
-                self.insertion_count += 1
-                print(f"{datetime.datetime.now()} - Dado inserido: T={temperatura}, U={umidade}")
+                if not cursor.fetchone():
+                    cursor.execute(
+                        "INSERT INTO valores (temperatura, umidade, data) VALUES (%s, %s, %s)",
+                        (temperatura, umidade, timestamp)
+                    )
+                    self.conexao.commit()
+                    self.insertion_count += 1
+                    print(f"{datetime.datetime.now()} - Dado inserido: T={temperatura}, U={umidade}")
 
-                if self.insertion_count >= self.max_insertions:
-                    self.clean_duplicate_data()
-                    self.insertion_count = 0
-            else:
-                print(f"{datetime.datetime.now()} - Dado duplicado ignorado")
-        except mariadb.Error as e:
-            print(f"{datetime.datetime.now()} - Erro ao inserir no banco: {e}")
-            self.connect()
-        finally:
-            if cursor:
-                cursor.close()
+                    if self.insertion_count >= self.max_insertions:
+                        self._clean_duplicate_data_sem_lock()
+                        self.insertion_count = 0
+                else:
+                    print(f"{datetime.datetime.now()} - Dado duplicado ignorado")
+            except mariadb.Error as e:
+                print(f"{datetime.datetime.now()} - Erro ao inserir no banco: {e}")
+                self.connect()
+            finally:
+                if cursor:
+                    cursor.close()
 
-    def clean_duplicate_data(self):
-        """Remove registros duplicados com base na coluna `data`."""
-        self.reconnect_if_needed()
+    # def clean_duplicate_data(self):
+    #     """Remove registros duplicados com base na coluna `data`."""
+    #     with self._lock:
+    #         self.reconnect_if_needed()
+    #         cursor = None
+    #         try:
+    #             cursor = self.conexao.cursor()
+    #             # Define timeout menor para não travar a aplicação
+    #             cursor.execute("SET innodb_lock_wait_timeout = 5")
+    #             cursor.execute("""
+    #                 DELETE t1
+    #                 FROM valores t1
+    #                 INNER JOIN (
+    #                     SELECT data, MIN(id) as min_id
+    #                     FROM valores
+    #                     GROUP BY data
+    #                     HAVING COUNT(*) > 1
+    #                 ) t2 ON t1.data = t2.data AND t1.id <> t2.min_id
+    #             """)
+    #             self.conexao.commit()
+    #             print(f"{datetime.datetime.now()} - Duplicatas removidas com sucesso")
+    #         except mariadb.Error as e:
+    #             print(f"{datetime.datetime.now()} - Erro ao remover duplicatas (ignorado): {e}")
+    #             try:
+    #                 self.conexao.rollback()  # Libera o lock imediatamente
+    #             except:
+    #                 pass
+    #         finally:
+    #             if cursor:
+    #                 cursor.close()
+    
+    def _clean_duplicate_data_sem_lock(self):
+        """Versão interna sem lock — só use quando o lock já estiver adquirido."""
         cursor = None
         try:
             cursor = self.conexao.cursor()
-            # Define timeout menor para não travar a aplicação
             cursor.execute("SET innodb_lock_wait_timeout = 5")
             cursor.execute("""
                 DELETE t1
@@ -91,12 +123,19 @@ class Database:
         except mariadb.Error as e:
             print(f"{datetime.datetime.now()} - Erro ao remover duplicatas (ignorado): {e}")
             try:
-                self.conexao.rollback()  # Libera o lock imediatamente
+                self.conexao.rollback()
             except:
                 pass
         finally:
             if cursor:
                 cursor.close()
+                
+    def clean_duplicate_data(self):
+        """Versão pública — adquire o lock."""
+        with self._lock:
+            self.reconnect_if_needed()
+            self._clean_duplicate_data_sem_lock()
+
 
     def clean_duplicate_data_started(self):
         if self.insertion_count == 0:
@@ -104,62 +143,79 @@ class Database:
 
     def update_setpoint_histerese(self, setpoint=None, histerese=None):
         """Atualiza os valores de setpoint e/ou histerese na tabela configuracoes."""
-        self.reconnect_if_needed()
-        cursor = None
-        try:
-            cursor = self.conexao.cursor()
-            if setpoint is not None and histerese is not None:
-                cursor.execute(
-                    "UPDATE configuracoes SET setpoint=%s, histerese=%s WHERE id=1",
-                    (setpoint, histerese)
-                )
-            elif setpoint is not None:
-                cursor.execute(
-                    "UPDATE configuracoes SET setpoint=%s WHERE id=1",
-                    (setpoint,)
-                )
-            elif histerese is not None:
-                cursor.execute(
-                    "UPDATE configuracoes SET histerese=%s WHERE id=1",
-                    (histerese,)
-                )
-            self.conexao.commit()
-            print(f"{datetime.datetime.now()} - Configurações atualizadas: setpoint={setpoint}, histerese={histerese}")
-        except mariadb.Error as e:
-            print(f"{datetime.datetime.now()} - Erro ao atualizar configurações: {e}")
-        finally:
-            if cursor:
-                cursor.close()
+        with self._lock:
+            self.reconnect_if_needed()
+            cursor = None
+            try:
+                cursor = self.conexao.cursor()
+                if setpoint is not None and histerese is not None:
+                    cursor.execute(
+                        "UPDATE configuracoes SET setpoint=%s, histerese=%s WHERE id=1",
+                        (setpoint, histerese)
+                    )
+                elif setpoint is not None:
+                    cursor.execute(
+                        "UPDATE configuracoes SET setpoint=%s WHERE id=1",
+                        (setpoint,)
+                    )
+                elif histerese is not None:
+                    cursor.execute(
+                        "UPDATE configuracoes SET histerese=%s WHERE id=1",
+                        (histerese,)
+                    )
+                self.conexao.commit()
+                print(f"{datetime.datetime.now()} - Configurações atualizadas: setpoint={setpoint}, histerese={histerese}")
+            except mariadb.Error as e:
+                print(f"{datetime.datetime.now()} - Erro ao atualizar configurações: {e}")
+            finally:
+                if cursor:
+                    cursor.close()
 
     def get_latest_setpoint_histerese(self):
         """Recupera os últimos valores de setpoint e histerese."""
-        self.reconnect_if_needed()
-        cursor = None
-        try:
-            cursor = self.conexao.cursor()
-            cursor.execute("SELECT setpoint, histerese, data_atualizacao FROM configuracoes WHERE id=1")
-            result = cursor.fetchone()
-            if result:
+        with self._lock:
+            self.reconnect_if_needed()
+            cursor = None
+            try:
+                cursor = self.conexao.cursor()
+                cursor.execute("SELECT setpoint, histerese, data_atualizacao FROM configuracoes WHERE id=1")
+                result = cursor.fetchone()
+                if result:
+                    return {
+                        "setpoint": result[0],
+                        "histerese": result[1],
+                        "data_atualizacao": result[2]
+                    }
                 return {
-                    "setpoint": result[0],
-                    "histerese": result[1],
-                    "data_atualizacao": result[2]
+                    "setpoint": None,
+                    "histerese": None,
+                    "data_atualizacao": None
                 }
-            return {
-                "setpoint": None,
-                "histerese": None,
-                "data_atualizacao": None
-            }
-        except mariadb.Error as e:
-            print(f"{datetime.datetime.now()} - Erro ao recuperar configurações: {e}")
-            return {
-                "setpoint": None,
-                "histerese": None,
-                "data_atualizacao": None
-            }
-        finally:
-            if cursor:
-                cursor.close()
+            except mariadb.Error as e:
+                print(f"{datetime.datetime.now()} - Erro ao recuperar configurações: {e}")
+                return {
+                    "setpoint": None,
+                    "histerese": None,
+                    "data_atualizacao": None
+                }
+            finally:
+                if cursor:
+                    cursor.close()
+                    
+    def run_query(self, query):
+        with self._lock:
+            self.reconnect_if_needed()
+            cursor = None
+            try:
+                cursor = self.conexao.cursor()
+                cursor.execute(query)
+                return cursor.fetchall()
+            except mariadb.Error as e:
+                print(f"{datetime.datetime.now()} - Erro na query: {e}")
+                return []
+            finally:
+                if cursor:
+                    cursor.close()
 
     def close_connection(self):
         if self.conexao:
