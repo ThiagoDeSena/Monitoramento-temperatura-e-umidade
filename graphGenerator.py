@@ -150,9 +150,6 @@ class GraphGenerator:
         print('Passou pelo update_graph')
         self.db.clean_duplicate_data_started()
         st.title("Gráfico de Monitoramento")
-        
-        self.auto_refresh_watcher() # Inicia o watcher de atualização automática
-        
         df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
         self.show_latest_readings(df)
         #Botões para a seleção do intevalo
@@ -286,41 +283,3 @@ class GraphGenerator:
         st.subheader("⚙️ Configurações Atuais")
         self.show_setpoint_histerese()
         
-    # 🟢 NOVO MÉTODO COMPONENTE FRAGMENT
-    @st.fragment(run_every=5)
-    def auto_refresh_watcher(self):
-        """Verifica silenciosamente no banco se há novos dados a cada 5 segundos."""
-        try:
-            self.db.reconnect_if_needed()
-            cursor = self.db.conexao.cursor()
-            
-            # Pega o timestamp do dado mais recente de leitura
-            cursor.execute("SELECT data FROM valores ORDER BY data DESC LIMIT 1")
-            last_val = cursor.fetchone()
-            last_val_time = str(last_val[0]) if last_val else ""
-            
-            # Pega o timestamp da última configuração alterada
-            cursor.execute("SELECT data_atualizacao FROM configuracoes WHERE id=1")
-            last_cfg = cursor.fetchone()
-            last_cfg_time = str(last_cfg[0]) if last_cfg else ""
-            
-            cursor.close()
-            
-            # Inicializa as variáveis de estado de sessão caso não existam
-            if "last_known_value_time" not in st.session_state:
-                st.session_state.last_known_value_time = last_val_time
-            if "last_known_config_time" not in st.session_state:
-                st.session_state.last_known_config_time = last_cfg_time
-            
-            # Se detectou que o banco atualizou leituras OU configurações
-            if (last_val_time != st.session_state.last_known_value_time) or \
-               (last_cfg_time != st.session_state.last_known_config_time):
-                
-                # Atualiza os estados locais da sessão
-                st.session_state.last_known_value_time = last_val_time
-                st.session_state.last_known_config_time = last_cfg_time
-                
-                # Força o Streamlit inteiro a renderizar novamente com os novos dados
-                st.rerun()
-        except Exception as e:
-            print(f"Erro no watcher de atualização: {e}")
