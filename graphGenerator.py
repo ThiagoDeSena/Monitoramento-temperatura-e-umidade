@@ -45,18 +45,14 @@ class GraphGenerator:
                 )
         
         with col3:
+            # Criamos um rótulo menor usando markdown simulando o estilo do st.metric
+            st.markdown("<small>⏰ Atualizado em</small>", unsafe_allow_html=True)
+        
             if config["data_atualizacao"] is not None:
-                st.metric(
-                    label="⏰ Atualizado em",
-                    value=f"{config['data_atualizacao']}",
-                    delta=None
-                )
+                # Se sua data for um objeto do banco, você pode formatá-la aqui se quiser, ex: config['data_atualizacao'].strftime('%d/%m/%Y %H:%M')
+                st.write(f"🕒 {config['data_atualizacao'].strftime('%d/%m/%Y %H:%M')}")
             else:
-                st.metric(
-                    label="⏰ Atualizado em",
-                    value="--",
-                    delta=None
-                )
+                st.write("🕒 --")
 
     def run_query(self, query):
         """Executa uma consulta SQL e retorna um DataFrame."""
@@ -280,7 +276,8 @@ class GraphGenerator:
         with col2:
             st.metric("💧 Umidade (%)", f"{umidade}")
         with col3:
-            st.write(f"🕒 {data}")
+            data_formatada = data.strftime('%d/%m/%Y %H:%M')
+            st.write(f"🕒 {data_formatada}")
         
         # Mostra setpoint e histerese logo abaixo
         st.subheader("⚙️ Configurações Atuais")
