@@ -1,23 +1,31 @@
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 from databases import Database
 from mqttClient import MqttClient
 from graphGenerator import GraphGenerator
-from streamlit_autorefresh import st_autorefresh
 
-# Configuração da página (Deve ser o primeiro comando)
+
+# 1. Configuração da página — SEMPRE primeiro
 st.set_page_config(page_title="Monitoramento Estufa", layout="wide")
 
-# Cria conexão com o banco
-db = Database(host="localhost", user="user01", password="pi", database="monitoramento")
+# 2. Autorefresh — SEMPRE logo após set_page_config
+st_autorefresh(interval=10000, limit=None, key="atualizador_estufa")
 
-# Criamos o MqttClient só para usar os botões de publish
-mqtt_client = MqttClient("localhost")  # sem data_processor, não vai escutar nada
+# 3. Inicializa objetos UMA VEZ usando session_state
+# Sem isso, a cada rerun o Streamlit recria tudo do zero
+if "db" not in st.session_state:
+    st.session_state.db = Database(
+        host="localhost", user="user01", password="pi", database="monitoramento"
+    )
+
+if "mqtt_client" not in st.session_state:
+    st.session_state.mqtt_client = MqttClient("localhost")
+
+# 4. Recupera os objetos do session_state
+db = st.session_state.db
+mqtt_client = st.session_state.mqtt_client
 
 # Interface gráfica
 graph = GraphGenerator(db, mqtt_client)
 graph.update_graph()
 graph.publish_button()
-
-# 🔄 ATUALIZAÇÃO AUTOMÁTICA (Colocada ao final do script)
-# interval=10000 significa 10 segundos. key é um identificador único.
-st_autorefresh(interval=10000, limit=None, key="atualizador_estufa")

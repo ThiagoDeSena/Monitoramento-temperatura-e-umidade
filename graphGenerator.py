@@ -144,59 +144,127 @@ class GraphGenerator:
 
       
     
-    # Atualiza o gráfico com os valores novos
-    def update_graph(self):
+    # # Atualiza o gráfico com os valores novos
+    # def update_graph(self):
         
+    #     print('Passou pelo update_graph')
+    #     self.db.clean_duplicate_data_started()
+    #     st.title("Gráfico de Monitoramento")
+    #     df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
+    #     self.show_latest_readings(df)
+    #     #Botões para a seleção do intevalo
+    #     with st.sidebar:
+    #         st.header("Selecionar Período")
+    #         col1,col2,col3 = st.columns(3)
+
+    #         with col1:
+    #             if st.button('1 Dia'):
+    #                 df = self.fetch_data_for_last_n_days(1)
+
+    #         with col2:
+    #             if st.button('7 Dias'):
+    #                 df = self.fetch_data_for_last_n_days(7)
+
+    #         with col3:
+    #             if st.button('30 Dias'):
+    #                 df = self.fetch_data_for_last_n_days(30)
+
+    #         if st.button('Tudo',use_container_width=True):
+    #                 df = self.fetch_all_data()  #Pega os valores do dataframe criado na consulta do banco
+
+    #         st.sidebar.expander('Selecionar Intervalo de Datas',icon=":material/search:")
+    #         col1,col2 = st.columns(2)
+    #         with col1:
+    #             start_date = st.date_input("Data Inicial",datetime.today(),key="start")
+    #         with col2:
+    #             end_date = st.date_input("Data Final",datetime.today(),key="end")
+    #         if st.button('Buscar',use_container_width=True):
+    #             if start_date and end_date:
+    #                 df = self.fetch_data_start_and_end(start_date,end_date)
+    #             else:
+    #                 st.warning('Selecione a data de inicil e fim da busca!',icon=":material/warning:")
+        
+    #         if df is not None:
+    #             mask = df.columns != 'data' #Cria uma máscara com True para as colunas diferentes de data
+    #             variavel = st.multiselect("Escolher variável",df.columns[mask],placeholder="Escolha uma opção")
+    #             if not variavel:
+    #                 variavel=['temperatura','umidade'] #Se não for escolhido nenhuma variável no st.multiselect então a minha variavel vai receber os dois valores ['temperatura','umidade']
+    #         if self.mqtt_client.rele_ligado:
+    #             st.success("Relé: Ligado")
+    #         else:
+    #             st.error("Relé: Desligado")  
+
+    #     st.divider()  # separa o título da parte interativa de filtro 
+    #     self.create_graph(df,variavel)  
+
+    def update_graph(self):
         print('Passou pelo update_graph')
         self.db.clean_duplicate_data_started()
         st.title("Gráfico de Monitoramento")
-        df = self.fetch_data_for_last_n_days(1) #Por padrão já mostra 1 Dia
-        self.show_latest_readings(df)
-        #Botões para a seleção do intevalo
+
+        # Garante que o período escolhido sobrevive ao rerun
+        if "periodo_dias" not in st.session_state:
+            st.session_state.periodo_dias = 1
+        if "df_custom" not in st.session_state:
+            st.session_state.df_custom = None
+
         with st.sidebar:
             st.header("Selecionar Período")
-            col1,col2,col3 = st.columns(3)
+            col1, col2, col3 = st.columns(3)
 
             with col1:
                 if st.button('1 Dia'):
-                    df = self.fetch_data_for_last_n_days(1)
-
+                    st.session_state.periodo_dias = 1
+                    st.session_state.df_custom = None
             with col2:
                 if st.button('7 Dias'):
-                    df = self.fetch_data_for_last_n_days(7)
-
+                    st.session_state.periodo_dias = 7
+                    st.session_state.df_custom = None
             with col3:
                 if st.button('30 Dias'):
-                    df = self.fetch_data_for_last_n_days(30)
+                    st.session_state.periodo_dias = 30
+                    st.session_state.df_custom = None
 
-            if st.button('Tudo',use_container_width=True):
-                    df = self.fetch_all_data()  #Pega os valores do dataframe criado na consulta do banco
+            if st.button('Tudo', use_container_width=True):
+                st.session_state.periodo_dias = None
+                st.session_state.df_custom = None
 
-            st.sidebar.expander('Selecionar Intervalo de Datas',icon=":material/search:")
-            col1,col2 = st.columns(2)
+            st.sidebar.expander('Selecionar Intervalo de Datas', icon=":material/search:")
+            col1, col2 = st.columns(2)
             with col1:
-                start_date = st.date_input("Data Inicial",datetime.today(),key="start")
+                start_date = st.date_input("Data Inicial", datetime.today(), key="start")
             with col2:
-                end_date = st.date_input("Data Final",datetime.today(),key="end")
-            if st.button('Buscar',use_container_width=True):
+                end_date = st.date_input("Data Final", datetime.today(), key="end")
+
+            if st.button('Buscar', use_container_width=True):
                 if start_date and end_date:
-                    df = self.fetch_data_start_and_end(start_date,end_date)
+                    st.session_state.df_custom = self.fetch_data_start_and_end(start_date, end_date)
+                    st.session_state.periodo_dias = None
                 else:
-                    st.warning('Selecione a data de inicil e fim da busca!',icon=":material/warning:")
-        
+                    st.warning('Selecione a data inicial e fim da busca!', icon=":material/warning:")
+
+            # Busca os dados conforme o estado salvo
+            if st.session_state.df_custom is not None:
+                df = st.session_state.df_custom
+            elif st.session_state.periodo_dias is not None:
+                df = self.fetch_data_for_last_n_days(st.session_state.periodo_dias)
+            else:
+                df = self.fetch_all_data()
+
             if df is not None:
-                mask = df.columns != 'data' #Cria uma máscara com True para as colunas diferentes de data
-                variavel = st.multiselect("Escolher variável",df.columns[mask],placeholder="Escolha uma opção")
+                mask = df.columns != 'data'
+                variavel = st.multiselect("Escolher variável", df.columns[mask], placeholder="Escolha uma opção")
                 if not variavel:
-                    variavel=['temperatura','umidade'] #Se não for escolhido nenhuma variável no st.multiselect então a minha variavel vai receber os dois valores ['temperatura','umidade']
+                    variavel = ['temperatura', 'umidade']
+
             if self.mqtt_client.rele_ligado:
                 st.success("Relé: Ligado")
             else:
-                st.error("Relé: Desligado")  
+                st.error("Relé: Desligado")
 
-        st.divider()  # separa o título da parte interativa de filtro 
-        self.create_graph(df,variavel)  
-
+        self.show_latest_readings(df)
+        st.divider()
+        self.create_graph(df, variavel)
 
     # Publica uma mensagem para acionar o relé
     def publish_button(self):
